@@ -27,7 +27,7 @@ Obs: Esses itens acima foram retirados do próprio processo conforme link no cam
 
 # Tecnologias e bibliotecas utilizadas
 
-Para criar o projeto nos moldes que foi solicitado, foi utilizado a linguagem Python com a utilização de um ambiente venv com as bibliotecas abaixo que foram necessárias para o funcionamento adequado:
+Para criar o projeto nos moldes que foi solicitado, foi utilizado a linguagem Python com a utilização de um ambiente venv com as bibliotecas abaixo que foram necessárias para o funcionamento adequado e o PostgreSQL como o banco de dados:
 
 * alembic            1.13.3
 * annotated-types    0.7.0
@@ -60,7 +60,6 @@ Para criar o projeto nos moldes que foi solicitado, foi utilizado a linguagem Py
 * typing_extensions  4.12.2
 * urllib3            2.2.3
 * uvicorn            0.30.6
-
 
 # Desafios
 
