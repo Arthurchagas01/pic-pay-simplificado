@@ -1,6 +1,4 @@
-from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from models import Transactions, Users
 import requests
 import time
 

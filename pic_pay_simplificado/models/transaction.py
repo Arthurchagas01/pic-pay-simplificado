@@ -11,8 +11,8 @@ class Transactions(Base):
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Integer, index=True)
     sender_id = Column(Integer, ForeignKey(Users.id))
-    sender = relationship(Users, foreign_keys=[sender_id])
+    sender = relationship(Users, foreign_keys=[sender_id], cascade="all,delete")
     receiver_id = Column(Integer, ForeignKey(Users.id))
-    receiver = relationship(Users, foreign_keys=[receiver_id])
+    receiver = relationship(Users, foreign_keys=[receiver_id], cascade="all,delete")
 
 

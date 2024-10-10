@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from utils import engine, SessionLocal
+from utils import SessionLocal
 from pydantic import BaseModel
-import models
 from core import user_services
-from typing import Annotated, List
 
 router = APIRouter()
 
