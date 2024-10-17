@@ -27,7 +27,7 @@ Obs: Esses itens acima foram retirados do próprio processo conforme link no cam
 
 # Tecnologias e bibliotecas utilizadas
 
-Para criar o projeto nos moldes que foi solicitado, foi utilizado a linguagem Python com a utilização de um ambiente venv com as bibliotecas abaixo que foram necessárias para o funcionamento adequado e o PostgreSQL como o banco de dados:
+Para criar o projeto nos moldes que foi solicitado, foi utilizado a arquitetura monolítica e linguagem Python com a utilização de um ambiente venv  com as bibliotecas abaixo que foram necessárias para o funcionamento adequado e o PostgreSQL como o banco de dados:
 
 * alembic            1.13.3
 * annotated-types    0.7.0
@@ -74,9 +74,6 @@ O segundo desafio foi relativo as decisões sobre como seria informado se o usu�
 O último desafio ocorreu durante o desenvolvimento das notificações, pois foi informado na descrição do projeto que deveria ser utilizado um mock para simular o envio de notificação, no entanto, foi tomado a decisão de utilizar apenas o retorno da função com as informações em um json para confirmação. O mock informado não respondia aos comandos e foi mais prático seguir dessa forma. 
 
 No entanto, caso queira utilizar no projeto, basta retirar o "#" das linhas que validam se o retorno do mock foi 200 e isso deverá torná-lo usável no projeto. O arquivo é o notification_service.py.
-
-
-
 
 
 # Documentação da API
