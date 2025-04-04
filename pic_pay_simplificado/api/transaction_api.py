@@ -13,7 +13,7 @@ class Transactions_BaseModel(BaseModel):
     receiver_id : int
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 def get_db():
     db = SessionLocal()

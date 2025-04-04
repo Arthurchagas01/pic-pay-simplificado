@@ -1,168 +1,119 @@
+# Simplified PicPay
 
-# PicPay Simplificado
+This project is a solution for the PicPay Back-end selection process, which required simulating a "simplified PicPay system."
 
-O projeto consiste na resolução de um processo seletivo do PicPay Back-end no qual era solicitado que se simulasse um "sistema PicPay simplificado". 
+## Requirements from the Selection Process
 
-# O que foi solicitado na descrição do processo
+The process description outlined the basic functions and tasks the script should perform, including:
 
-Na descrição do processo, foi descrito o funcionamento de algumas funções e tarefas básicas que o script deveria fazer, tais como: 
+- Both user types must provide full name, CPF, email, and password. CPF/CNPJ and emails must be unique in the system. Only one registration per CPF or email address is allowed.
+- Users can send money (transfer funds) to merchants and between users.
+- Merchants can only receive transfers; they cannot send money.
+- Validate if the user has sufficient balance before processing the transfer.
+- Before finalizing the transfer, an external authorization service must be consulted. Use this mock service: https://util.devi.tools/api/v2/authorize (via GET request).
+- The transfer operation must be transactional (i.e., reversed in case of any inconsistency), ensuring that funds return to the sender's wallet if an issue occurs.
+- The service must be RESTful.
 
-* Para ambos tipos de usuário, precisamos do Nome Completo, CPF, e-mail e Senha. CPF/CNPJ e e-mails devem ser únicos no sistema. Sendo assim, seu sistema deve permitir apenas um cadastro com o mesmo CPF ou endereço de e-mail;
+All these tasks were implemented and tested. The only exception was the notification mock service, which was not working and therefore not included.
 
-* Usuários podem enviar dinheiro (efetuar transferência) para lojistas e entre usuários;
+**Note:** The above items were extracted directly from the selection process description, as referenced in the "References" section.
 
-* Lojistas só recebem transferências, não enviam dinheiro para ninguém;
+## Technologies and Libraries Used
 
-* Validar se o usuário tem saldo antes da transferência;
+To develop the project according to the specifications, a monolithic architecture was used with Python and a virtual environment (venv). The following libraries were necessary for proper functionality, along with PostgreSQL as the database:
 
-* Antes de finalizar a transferência, deve-se consultar um serviço autorizador externo, use este mock https://util.devi.tools/api/v2/authorize para simular o serviço utilizando o verbo GET;
+- FastAPI
+- SQLAlchemy
+- Alembic
+- Psycopg2
+- HTTPX
+- Pytest
+- Uvicorn
 
-* A operação de transferência deve ser uma transação (ou seja, revertida em qualquer caso de inconsistência) e o dinheiro deve voltar para a carteira do usuário que envia;
+## Challenges Faced
 
-* Este serviço deve ser RESTFul.
+Several challenges arose during the project that required careful decision-making to ensure proper application functionality and user-transaction relationships, as well as API route structuring.
 
-Todas essas tarefas foram feitas e testadas. Apenas uma que não foi incluída acima e ela era relativa ao mock de notificação que não está funcionando e não foi inserida.
+### User and Transaction Table Relationships
 
-Obs: Esses itens acima foram retirados do próprio processo conforme link no campo Referência.
+The first challenge was designing the relationship between the Users (`users`) and Transactions (`transactions`) tables. A user could perform multiple transactions, but each transaction should always involve two distinct users—meaning a user could not transfer money to themselves.
 
-# Tecnologias e bibliotecas utilizadas
+To address this, the Transactions table was designed with four entries to represent foreign key relationships, implementing a **many-to-one** format.
 
-Para criar o projeto nos moldes que foi solicitado, foi utilizado a arquitetura monolítica e linguagem Python com a utilização de um ambiente venv  com as bibliotecas abaixo que foram necessárias para o funcionamento adequado e o PostgreSQL como o banco de dados:
+### User Type Identification
 
-* alembic            1.13.3
-* annotated-types    0.7.0
-* anyio              4.6.0
-* certifi            2024.8.30
-* charset-normalizer 3.3.2
-* click              8.1.7
-* colorama           0.4.6
-* fastapi            0.115.0
-* greenlet           3.1.1
-* h11                0.14.0
-* httpcore           1.0.6
-* httpx              0.27.2
-* idna               3.10
-* iniconfig          2.0.0
-* Mako               1.3.5
-* MarkupSafe         2.1.5
-* packaging          24.1
-* pip                24.2
-* pluggy             1.5.0
-* psycopg2           2.9.9
-* pydantic           2.9.2
-* pydantic_core      2.23.4
-* pytest             8.3.3
-* pytest-asyncio     0.24.0
-* requests           2.32.3
-* sniffio            1.3.1
-* SQLAlchemy         2.0.35
-* starlette          0.38.6
-* typing_extensions  4.12.2
-* urllib3            2.2.3
-* uvicorn            0.30.6
+The second challenge was determining how to distinguish between individual users (PF) and merchants (PJ). A boolean field `user_store` (indicating "is a merchant") was introduced:
+- If `user_store = True`, the user is a merchant (PJ).
+- If `user_store = False`, the user is an individual (PF).
 
-# Desafios
+### Notification Mock Issues
 
-Durante o projeto existiram alguns desafios que foram necessárias algumas decisões para o bom funcionamento da aplicação, permitindo que as relações entre os usuários e as transações fossem possíveis e também na criação das rotas das APIs.
+The final challenge was implementing notifications. The project description specified using a mock service for notification simulation. However, this mock service was unresponsive, so an alternative approach was taken: the function simply returns a JSON confirmation.
 
-O primeiro desafio foi na criação das tabelas de Usuário (users) e Transações (transactions): era necessário criar um relacionamento entre as partes tal que um usuário poderia efetivar várias transações, no entanto, cada transação só poderiam ter dois usuários distintos, ou seja, o usuário não poderia enviar pra ele mesmo. 
+To enable the notification mock, remove the `#` comments from the lines that validate if the mock service response is `200`. The relevant file is `notification_service.py`.
 
-Assim, foi criado na tabela de Transações 4 entradas que representariam o relacionamento com a chave estrageira (foreign_key) de forma que seria o formato Many-to-one (muitos-para-um).
+## API Documentation
 
-O segundo desafio foi relativo as decisões sobre como seria informado se o usuário é uma pessoa física ou jurídica. Uma variável booleana user_store, com o sentido de "usuario_loja", se tornou a solução para representar a loja. Se a variável for colocada como True, será entendido como uma loja, caso contrário, se for False, será entendido como um usuário pessoa física.
+### Users API
 
-O último desafio ocorreu durante o desenvolvimento das notificações, pois foi informado na descrição do projeto que deveria ser utilizado um mock para simular o envio de notificação, no entanto, foi tomado a decisão de utilizar apenas o retorno da função com as informações em um json para confirmação. O mock informado não respondia aos comandos e foi mais prático seguir dessa forma. 
+#### Retrieve All Users
+**Endpoint:** `GET /users/`
 
-No entanto, caso queira utilizar no projeto, basta retirar o "#" das linhas que validam se o retorno do mock foi 200 e isso deverá torná-lo usável no projeto. O arquivo é o notification_service.py.
+| Parameter  | Type | Description |
+|------------|------|-------------|
+| N/A        | N/A  | Returns all registered users |
 
+#### Create a New User
+**Endpoint:** `POST /users/`
 
-# Documentação da API
+| Parameter      | Type     | Description |
+|---------------|---------|-------------|
+| `first_name`  | string  | **Required**. User's first name |
+| `last_name`   | string  | **Required**. User's last name |
+| `document`    | string  | **Required**. User's CPF/CNPJ (validated as unique) |
+| `email`       | string  | **Required**. User's email (validated as unique) |
+| `password`    | string  | **Required**. User's password |
+| `balance`     | integer | **Required**. User's initial balance |
+| `user_store`  | boolean | **Required**. Defines if user is a merchant (PJ) or individual (PF) |
 
-## Api relativa aos usuários criados (users)
+### Transactions API
 
-#### Retorna todos os itens:
-### Função: get_all_users()
+#### Retrieve All Transactions Sent by a User
+**Endpoint:** `GET /transactions/sent/{user_id}`
 
-```http
-  GET /users/
-```
+| Parameter  | Type     | Description |
+|------------|---------|-------------|
+| `user_id`  | integer | **Required**. Returns all transactions sent by the user |
 
-| Parâmetro   | Tipo       | Descrição                           |
-| :---------- | :--------- | :---------------------------------- |
-| `N/A` | `N/A` | Retorna todos os usuários criados |
+#### Retrieve All Transactions Received by a User
+**Endpoint:** `GET /transactions/received/{user_id}`
 
-#### Cria um usuário (user):
-### Função: create_new_user(new_user)
+| Parameter  | Type     | Description |
+|------------|---------|-------------|
+| `user_id`  | integer | **Required**. Returns all transactions received by the user |
 
-```http
-  POST /users/
-```
+#### Create a Transaction
+**Endpoint:** `POST /transactions/`
 
-| Parâmetro   | Tipo       | Descrição                                   |
-| :---------- | :--------- | :------------------------------------------ |
-| `first_name`      | `string` | **Obrigatório**. O nome do usuário|
-| `last_name`      | `string` | **Obrigatório**. O sobrenome do usuário |
-| `document`      | `string` | **Obrigatório**. O CPF/CNPJ do usuário e este será validado se é único |
-| `email`      | `string` | **Obrigatório**. O email do usuário e este será validado se é único |
-| `password`      | `string` | **Obrigatório**. A senha do usuário |
-| `balance`      | `integer` | **Obrigatório**. O saldo do usuário |
-| `user_store`      | `boolean` | **Obrigatório**. Se o usuário é PF ou PJ |
+| Parameter     | Type     | Description |
+|--------------|---------|-------------|
+| `amount`     | integer | **Required**. Transfer amount |
+| `sender_id`  | integer | **Required**. User sending the funds |
+| `receiver_id`| integer | **Required**. User receiving the funds |
 
-Obs: Ao criar um usuário, é gerado um id e esse id é utilizado como sender_id no caso de envio de recurso e receiver_id, caso o usuário receba recurso nos próximos itens.
+**Note:** Merchants (PJ) can only receive money and cannot send funds.
 
-## Api relativa as transações criadas (transactions)
+## Running Tests
 
-#### Retorna todos as transações enviadas por usuário (user_id):
-### Função: get_transactions_sent(user_id)
-
-```http
-  GET /transactions/sent/{user_id}
-```
-
-| Parâmetro   | Tipo       | Descrição                           |
-| :---------- | :--------- | :---------------------------------- |
-| `user_id` | `integer` | **Obrigatório**. Retorna todos as transações que foram enviadas pelo usuário|
-
-#### Retorna todos as transações recebidas por usuário (user_id):
-### Função: get_transactions_received(user_id)
-
-```http
-  GET /transactions/received/{user_id}
-```
-
-| Parâmetro   | Tipo       | Descrição                           |
-| :---------- | :--------- | :---------------------------------- |
-| `user_id` | `integer` | **Obrigatório**. Retorna todos as transações que foram recebidas pelo usuário |
-
-#### Cria uma transação que será enviada por um usuário que possui saldo para efetuar essa transferência e que não seja PJ e recebida por outro:
-### Função: get_transactions_received(user_id)
-
-```http
-  POST /transactions/
-```
-
-| Parâmetro   | Tipo       | Descrição                           |
-| :---------- | :--------- | :---------------------------------- |
-| `amount` | `integer` | **Obrigatório**. Valor que será transferido |
-| `sender_id` | `integer` | **Obrigatório**. Usuário que enviará o recurso |
-| `receiver_id` | `integer` | **Obrigatório**. Usuário que receberá o recurso |
-
-Obs: PJ só recebe dinheiro e não envia.
-# Rodando os testes
-
-Para rodar os testes, rode o seguinte comando
-
+To run the tests, use the following command:
 ```bash
-  pytest
+pytest
 ```
 
+## References
 
-# Referência
-
- - [Desafio Back-end PicPay](https://github.com/PicPay/picpay-desafio-backend?tab=readme-ov-file)
-
-- [Pytest - Good Integration Practices](https://docs.pytest.org/en/latest/explanation/goodpractices.html#test-package-name)
-
-- [SQLAlchemy ORM - Building Relationship](https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_building_relationship.htm)
-
+- [PicPay Back-end Challenge](https://github.com/PicPay/picpay-desafio-backend?tab=readme-ov-file)
+- [Pytest - Best Practices](https://docs.pytest.org/en/latest/explanation/goodpractices.html#test-package-name)
+- [SQLAlchemy ORM - Relationship Building](https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_building_relationship.htm)
 - [Basic Relationship Patterns](https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html)
+

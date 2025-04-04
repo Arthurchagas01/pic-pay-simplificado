@@ -16,7 +16,7 @@ class Users_BaseModel(BaseModel):
     user_store : bool
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 def get_db():
